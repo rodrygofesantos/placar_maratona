@@ -16,8 +16,11 @@ st.set_page_config(
 )
 
 DB_FILE = "maratona.db"
-PROBLEMAS = list("ABCDEFG")
-CORES_BALOES = ["#f97316", "#3b82f6", "#eab308", "#22c55e", "#a855f7", "#06b6d4", "#fb923c"]
+# AJUSTE 1: Adicionado "H" na lista
+PROBLEMAS = list("ABCDEFGH")
+
+# AJUSTE 2: Adicionada uma 8ª cor (#e11d48 - rosa/vermelho)
+CORES_BALOES = ["#f97316", "#3b82f6", "#eab308", "#22c55e", "#a855f7", "#06b6d4", "#fb923c", "#e11d48"]
 
 
 # ----------------------------
@@ -250,7 +253,6 @@ if not modo_telao:
             st.rerun()
 
 # --- LAYOUT PRINCIPAL ---
-# Define a proporção das colunas. A do relógio (c_clock) precisa ser bem larga.
 c1, c_clock = st.columns([1, 4])
 
 with c1:
@@ -269,8 +271,7 @@ with c_clock:
     fim = inicio_prova + duracao_prova
     ts_fim = int(fim.timestamp() * 1000)
 
-    # HTML DO RELÓGIO COM CSS EMBUTIDO (CORREÇÃO DA FALHA)
-    # A fonte é carregada DENTRO do iframe do componente HTML
+    # HTML DO RELÓGIO
     html(f"""
     <!DOCTYPE html>
     <html>
@@ -285,8 +286,8 @@ with c_clock:
         body {{
             margin: 0;
             display: flex;
-            justify-content: center; /* Centraliza horizontalmente */
-            align-items: center;     /* Centraliza verticalmente */
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             background-color: transparent;
             font-family: 'Segoe UI', sans-serif;
@@ -294,9 +295,9 @@ with c_clock:
 
         .clock-container {{
             background-color: #000000;
-            color: #00ff00; /* Verde Neon Padrão */
+            color: #00ff00;
             font-family: 'DSEG7', monospace;
-            font-size: 110px; /* TAMANHO DA FONTE FORÇADO AQUI */
+            font-size: 110px;
             line-height: 1;
             padding: 20px 40px;
             border-radius: 15px;
@@ -305,10 +306,9 @@ with c_clock:
             text-align: center;
             letter-spacing: 5px;
             text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
-            min-width: 550px; /* Garante largura mínima para não quebrar linha */
+            min-width: 550px;
         }}
 
-        /* Ajuste responsivo se a tela for muito pequena */
         @media (max-width: 800px) {{
             .clock-container {{ font-size: 60px; min-width: 300px; padding: 10px 20px; }}
         }}
@@ -329,7 +329,7 @@ with c_clock:
 
             if (d < 0) {{ 
                 el.innerHTML = "00:00:00"; 
-                el.style.color = "#ff0000"; // Vermelho
+                el.style.color = "#ff0000"; 
                 el.style.textShadow = "0 0 30px rgba(255, 0, 0, 1)";
                 return; 
             }}
@@ -338,14 +338,12 @@ with c_clock:
             const m = Math.floor((d % 3600000) / 60000);
             const s = Math.floor((d % 60000) / 1000);
 
-            // Formatação com zeros à esquerda
             const hStr = h < 10 ? "0" + h : h;
             const mStr = m < 10 ? "0" + m : m;
             const sStr = s < 10 ? "0" + s : s;
 
             el.innerHTML = hStr + ":" + mStr + ":" + sStr;
 
-            // Regra dos 10 minutos (600.000 ms)
             if (d <= 600000) {{
                 el.style.color = "#ff0000";
                 el.style.textShadow = "0 0 30px rgba(255, 0, 0, 1)";
@@ -356,11 +354,11 @@ with c_clock:
         }}
 
         setInterval(updateTimer, 1000);
-        updateTimer(); // Executa imediatamente
+        updateTimer();
         </script>
     </body>
     </html>
-    """, height=220)  # A altura do iframe precisa ser maior que o relógio para não cortar
+    """, height=220)
 
 # --- TABELA DE PLACAR ---
 ranking, firsts = obter_dados()
@@ -381,7 +379,8 @@ for i, (eq, stt) in enumerate(ranking, 1):
         suc = any(r == "Correto" for r, _ in pd)
         if suc:
             t = next(tm for r, tm in pd if r == "Correto")
-            c = CORES_BALOES[idx % 7]
+            # AJUSTE 3: Modulo por 8 para incluir a nova cor
+            c = CORES_BALOES[idx % 8]
             f = "<b style='color:green;font-size:0.6em'>★FIRST</b>" if firsts.get(p) == eq else ""
             h += f"<td><div style='display:flex;flex-direction:column;align-items:center'><div class='balloon' style='background:{c}'></div><small>{len(pd)}/{t}'</small>{f}</div></td>"
         elif len(pd) > 0:
